@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sih/dashboard.dart';
 import 'package:sih/landing.dart';
@@ -245,9 +246,7 @@ class _ProgressPageState extends State<ProgressPage> {
                         MaterialPageRoute(
                           builder:
                               (context) => PatientDashboardPage(
-                                userName: 'namewwww',
-                                email: 'demo@gmail.com',
-                                age: '22',
+                                uid: FirebaseAuth.instance.currentUser!.uid,
                               ),
                         ),
                       );

@@ -1,10 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:sih/section.dart';
+import 'firebase_options.dart';
+import 'main_page.dart';
 
-void main() {
-  runApp(const PanchakarmaApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // use your options
+  );
+  runApp(PanchakarmaApp());
 }
 
 class PanchakarmaApp extends StatelessWidget {

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sih/dashboard.dart';
 import 'package:sih/signup.dart';
 
 class PatientLoginPage extends StatefulWidget {
-  final String? name;
   final String? email;
-  final String? age;
 
-  const PatientLoginPage({Key? key, this.name, this.email, this.age})
-    : super(key: key);
+  const PatientLoginPage({Key? key, this.email}) : super(key: key);
 
   @override
   _PatientLoginPageState createState() => _PatientLoginPageState();
@@ -18,6 +17,67 @@ class _PatientLoginPageState extends State<PatientLoginPage> {
   final _formKey = GlobalKey<FormState>();
   String email = '';
   String password = '';
+  bool loading = false;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> loginPatient() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => loading = true);
+
+    try {
+      // Firebase Auth login
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+
+      String uid = userCredential.user!.uid;
+
+      if (mounted) {
+        setState(() => loading = false);
+
+        // Navigate with uid, let dashboard fetch Firestore data
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => PatientDashboardPage(uid: uid)),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() => loading = false);
+
+      String errorMessage;
+      if (e.code == 'user-not-found') {
+        errorMessage = "No user found for this email.";
+      } else if (e.code == 'wrong-password') {
+        errorMessage = "Invalid password. Please try again.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "The email address is not valid.";
+      } else if (e.code == 'network-request-failed') {
+        errorMessage = "No internet connection. Please try again.";
+      } else {
+        errorMessage = e.message ?? "Login failed. Please try again.";
+      }
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder:
+              (_) => AlertDialog(
+                title: const Text("Login Error"),
+                content: Text(errorMessage),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("OK"),
+                  ),
+                ],
+              ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,106 +109,61 @@ class _PatientLoginPageState extends State<PatientLoginPage> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Email Field
+                  // Email field
                   TextFormField(
                     initialValue: widget.email ?? '',
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       labelText: "Email",
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.email),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Enter your email";
-                      }
-                      if (!RegExp(
-                        r'^[a-zA-Z0-9._%+-]+@gmail\.com$',
-                      ).hasMatch(value)) {
-                        return "Enter a valid Gmail address";
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => setState(() => email = value),
+                    validator:
+                        (value) => value!.isEmpty ? "Enter your email" : null,
+                    onChanged: (value) => email = value,
                   ),
-
                   const SizedBox(height: 25),
 
-                  // Password Field
+                  // Password field
                   TextFormField(
                     obscureText: true,
+                    textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
                       labelText: "Password",
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Enter your password";
-                      }
-                      if (value.length < 8) {
-                        return "Password must be at least 8 characters";
-                      }
-                      if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
-                        return "Password must contain a lowercase letter";
-                      }
-                      if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
-                        return "Password must contain an uppercase letter";
-                      }
-                      if (!RegExp(r'^(?=.*\d)').hasMatch(value)) {
-                        return "Password must contain a number";
-                      }
-                      if (!RegExp(r'^(?=.*[!@#\$&*~])').hasMatch(value)) {
-                        return "Password must contain a special character (!@#\$&*~)";
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => setState(() => password = value),
+                    validator:
+                        (value) =>
+                            value!.isEmpty ? "Enter your password" : null,
+                    onChanged: (value) => password = value,
                   ),
-
                   const SizedBox(height: 20),
 
-                  // Login Button
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        print("Login with $email & $password");
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => PatientDashboardPage(
-                                  userName:
-                                      widget.name ?? "User", // fallback if null
-                                  email:
-                                      widget.email ??
-                                      email, // fallback to entered email
-                                  age: widget.age ?? "0", // fallback if null
-                                ),
+                  // Login button
+                  loading
+                      ? const CircularProgressIndicator(color: Colors.green)
+                      : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      }
-                    },
-
-                    child: const Text("Login"),
-                  ),
-
+                        ),
+                        onPressed: loginPatient,
+                        child: const Text("Login"),
+                      ),
                   const SizedBox(height: 12),
 
-                  // Signup Redirect
+                  // Signup redirect
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PatientSignupPage(),
+                          builder: (context) => const PatientSignupPage(),
                         ),
                       );
                     },

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "558415758788",
+    "project_id": "sihapp-66785",
+    "storage_bucket": "sihapp-66785.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558415758788:android:12245179fed1d6b2419091",
+        "android_client_info": {
+          "package_name": "com.example.sih"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558415758788-4n4ms79dh2g7kh52gvb21olhtmp2n17m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5XT9mwMetQrn3dtMobse01mBtC93AYDY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "558415758788-4n4ms79dh2g7kh52gvb21olhtmp2n17m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "558415758788-tqpje6fn3861g9oco2mducu4da9sqc4o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sih"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

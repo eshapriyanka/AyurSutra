@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sih/dashboard.dart';
 import 'package:sih/landing.dart';
@@ -21,8 +22,10 @@ class _NotificationsScreen1State extends State<NotificationsScreen1> {
         backgroundColor: const Color(0xFFE6F5D8),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, color: Colors.green),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           "Notifications",
@@ -88,85 +91,81 @@ class _NotificationsScreen1State extends State<NotificationsScreen1> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Divider(height: 1, color: Color(0xFFEDF3E8)),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  BottomNavItem(
-                    icon: Icons.grid_view,
-                    label: "Dashboard",
-                    active: selectedBottomIndex == 0,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 0);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => PatientDashboardPage(
-                                userName: 'namewwww',
-                                email: 'demo@gmail.com',
-                                age: '22',
-                              ),
-                        ),
-                      );
-                    },
-                  ),
-                  BottomNavItem(
-                    icon: Icons.calendar_month,
-                    label: "Schedule",
-                    active: selectedBottomIndex == 1,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 1);
-                      // Replace with your actual page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StitchDesignApp(),
-                        ),
-                      );
-                    },
-                  ),
+      // bottomNavigationBar: SafeArea(
+      //   child: Column(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       const Divider(height: 1, color: Color(0xFFEDF3E8)),
+      //       Padding(
+      //         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      //         child: Row(
+      //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+      //           children: [
+      //             BottomNavItem(
+      //               icon: Icons.grid_view,
+      //               label: "Dashboard",
+      //               active: selectedBottomIndex == 0,
+      //               onTap: () {
+      //                 setState(() => selectedBottomIndex = 0);
+      //                 Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(
+      //                     builder:
+      //                         (context) => PatientDashboardPage(
+      //                           uid: FirebaseAuth.instance.currentUser!.uid,
+      //                         ),
+      //                   ),
+      //                 );
+      //               },
+      //             ),
+      //             BottomNavItem(
+      //               icon: Icons.calendar_month,
+      //               label: "Schedule",
+      //               active: selectedBottomIndex == 1,
+      //               onTap: () {
+      //                 setState(() => selectedBottomIndex = 1);
+      //                 // Replace with your actual page
+      //                 Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(
+      //                     builder: (context) => StitchDesignApp(),
+      //                   ),
+      //                 );
+      //               },
+      //             ),
 
-                  BottomNavItem(
-                    icon: Icons.notifications,
-                    label: "Updates",
-                    active: selectedBottomIndex == 2,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 2);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotificationsScreen1(),
-                        ),
-                      );
-                    },
-                  ),
-                  BottomNavItem(
-                    icon: Icons.person,
-                    label: "Profile",
-                    active: selectedBottomIndex == 3,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 3);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StitchDesignApp1(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      //             BottomNavItem(
+      //               icon: Icons.notifications,
+      //               label: "Updates",
+      //               active: selectedBottomIndex == 2,
+      //               onTap: () {
+      //                 setState(() => selectedBottomIndex = 2);
+      //                 Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(
+      //                     builder: (context) => NotificationsScreen1(),
+      //                   ),
+      //                 );
+      //               },
+      //             ),
+      //             BottomNavItem(
+      //               icon: Icons.person,
+      //               label: "Profile",
+      //               active: selectedBottomIndex == 3,
+      //               onTap: () {
+      //                 setState(() => selectedBottomIndex = 3);
+      //                 Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(builder: (context) => ProfilePage()),
+      //                 );
+      //               },
+      //             ),
+      //           ],
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
     );
   }
 
@@ -223,41 +222,41 @@ class _NotificationsScreen1State extends State<NotificationsScreen1> {
   }
 }
 
-class BottomNavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
+// class BottomNavItem extends StatelessWidget {
+//   final IconData icon;
+//   final String label;
+//   final bool active;
+//   final VoidCallback onTap;
 
-  const BottomNavItem({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
+//   const BottomNavItem({
+//     super.key,
+//     required this.icon,
+//     required this.label,
+//     required this.active,
+//     required this.onTap,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: active ? const Color(0xFF141B0E) : const Color(0xFF739550),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: active ? FontWeight.bold : FontWeight.w500,
-              color: active ? const Color(0xFF141B0E) : const Color(0xFF739550),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Icon(
+//             icon,
+//             color: active ? const Color(0xFF141B0E) : const Color(0xFF739550),
+//           ),
+//           Text(
+//             label,
+//             style: TextStyle(
+//               fontSize: 12,
+//               fontWeight: active ? FontWeight.bold : FontWeight.w500,
+//               color: active ? const Color(0xFF141B0E) : const Color(0xFF739550),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

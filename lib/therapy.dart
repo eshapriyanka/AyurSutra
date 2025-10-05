@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:sih/abc.dart';
+import 'package:sih/doctor_dashboard.dart';
+import 'package:sih/doctor_profile.dart';
+import 'package:sih/feedback_doctor.dart';
+import 'package:sih/settings.dart';
 
 void main() {
-  runApp(const TherapyApp());
+  runApp(const TherapySchedulePage());
 }
 
-class TherapyApp extends StatelessWidget {
-  const TherapyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Therapy Schedule",
-      debugShowCheckedModeBanner: false,
-      home: const TherapySchedulePage(),
-    );
-  }
-}
-
-class TherapySchedulePage extends StatelessWidget {
+class TherapySchedulePage extends StatefulWidget {
   const TherapySchedulePage({super.key});
 
+  @override
+  State<TherapySchedulePage> createState() => _TherapySchedulePageState();
+}
+
+class _TherapySchedulePageState extends State<TherapySchedulePage> {
+  int selectedBottomIndex = 0; // keep state here ✅
   // Colors
   static const Color primaryColor = Color(0xFF4CAF50);
   static const Color secondaryColor = Color(0xFFA1887F);
@@ -47,8 +45,11 @@ class TherapySchedulePage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: textColor),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
+
         centerTitle: true,
         title: const Text(
           "Therapy Schedule",
@@ -151,80 +152,85 @@ class TherapySchedulePage extends StatelessWidget {
         ),
       ),
 
-      // FOOTER
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Buttons
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: Column(
-              children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+      bottomNavigationBar: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Divider(height: 1, color: Color(0xFFEDF3E8)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  BottomNavItem(
+                    icon: Icons.grid_view,
+                    label: "Dashboard",
+                    active: selectedBottomIndex == 0,
+                    onTap: () => setState(() => selectedBottomIndex = 2),
                   ),
-                  child: const Text(
-                    "Book Online Consultation",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(
-                      255,
-                      213,
-                      181,
-                      154,
-                    ), // Second button color
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Book Therapy Session",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          // Bottom Navigation
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: lightGreenColor)),
-              color: backgroundColor,
+                  BottomNavItem(
+                    icon: Icons.groups,
+                    label: "Patients",
+                    active: selectedBottomIndex == 1,
+                    onTap: () {
+                      setState(() => selectedBottomIndex = 1);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PanchakarmaApp1(),
+                        ),
+                      );
+                    },
+                  ),
+                  BottomNavItem(
+                    icon: Icons.spa,
+                    label: "Therapies",
+                    active: selectedBottomIndex == 2,
+                    onTap: () {
+                      setState(() => selectedBottomIndex = 2);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TherapySchedulePage(),
+                        ),
+                      );
+                    },
+                  ),
+                  BottomNavItem(
+                    icon: Icons.chat_bubble,
+                    label: "Feedback",
+                    active: selectedBottomIndex == 3,
+                    onTap: () {
+                      setState(() => selectedBottomIndex = 3);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientFeedbackPage(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  BottomNavItem(
+                    icon: Icons.settings,
+                    label: "Setting",
+                    active: selectedBottomIndex == 5,
+                    onTap: () {
+                      setState(() => selectedBottomIndex = 5);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PanchakarmaSettingsApp3(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(Icons.grid_view, "Dashboard", secondaryColor),
-                _buildNavItem(
-                  Icons.calendar_month,
-                  "Schedule",
-                  primaryColor,
-                  isActive: true,
-                ),
-                _buildNavItem(Icons.person, "Profile", secondaryColor),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -428,6 +434,45 @@ class TherapySchedulePage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class BottomNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  const BottomNavItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: active ? const Color(0xFF141B0E) : const Color(0xFF739550),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: active ? FontWeight.bold : FontWeight.w500,
+              color: active ? const Color(0xFF141B0E) : const Color(0xFF739550),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

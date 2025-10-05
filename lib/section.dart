@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sih/abc.dart';
+import 'package:sih/doctor_dashboard.dart';
 import 'package:sih/login.dart';
 import 'package:sih/therapy.dart';
 
@@ -54,8 +56,7 @@ class RoleSelectionPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder:
-                            (context) => TherapyApp(), // direct page reference
+                        builder: (context) => MyApp2(), // direct page reference
                       ),
                     );
                   },

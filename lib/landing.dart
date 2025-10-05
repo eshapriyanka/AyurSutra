@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sih/bookingSession.dart';
 import 'package:sih/dashboard.dart';
 import 'package:sih/notifications.dart';
 import 'package:sih/profile.dart';
@@ -47,8 +50,19 @@ class _SchedulePageState extends State<SchedulePage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF141B0E)),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => PatientDashboardPage(
+                      uid: FirebaseAuth.instance.currentUser!.uid,
+                    ),
+              ),
+            );
+          },
         ),
+
         title: const Text(
           "Schedule",
           style: TextStyle(
@@ -58,141 +72,55 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: [
-          ToggleButtonsRow(),
-          const SizedBox(height: 12),
+      body: StreamBuilder<QuerySnapshot>(
+        stream:
+            FirebaseFirestore.instance
+                .collection("sessions")
+                .orderBy("createdAt", descending: true)
+                .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text("No sessions booked yet."));
+          }
 
-          // Card 1
-          ScheduleCard(
-            index: 0,
-            isSelected: selectedCardIndex == 0,
-            icon: Icons.spa,
-            title: "Abhyanga",
-            time: "10:00 AM",
-            subtitle: "Upcoming - Today, 20th July",
-            doctor: "Dr. Anjali Sharma",
-            completed: false,
-            onTap: () {
-              setState(() => selectedCardIndex = 0);
+          final sessions = snapshot.data!.docs;
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: sessions.length,
+            itemBuilder: (context, index) {
+              final session = sessions[index];
+              return ScheduleCard(
+                index: index,
+                isSelected: selectedCardIndex == index,
+                icon: Icons.spa,
+                title: session["title"],
+                time: session["time"],
+                subtitle: session["subtitle"],
+                doctor: session["doctor"],
+                completed: session["completed"],
+                onTap: () {
+                  setState(() => selectedCardIndex = index);
+                },
+              );
             },
-          ),
-
-          const SizedBox(height: 12),
-
-          // Card 2
-          ScheduleCard(
-            index: 1,
-            isSelected: selectedCardIndex == 1,
-            icon: Icons.self_improvement,
-            title: "Shirodhara",
-            time: "11:00 AM",
-            subtitle: "Upcoming - 21st July",
-            doctor: "Dr. Anjali Sharma",
-            completed: false,
-            onTap: () {
-              setState(() => selectedCardIndex = 1);
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          // Card 3
-          ScheduleCard(
-            index: 2,
-            isSelected: selectedCardIndex == 2,
-            icon: Icons.hot_tub,
-            title: "Swedana",
-            time: "12:00 PM",
-            subtitle: "Completed - 19th July",
-            doctor: "Dr. Anjali Sharma",
-            completed: true,
-            onTap: () {
-              setState(() => selectedCardIndex = 2);
-            },
-          ),
-        ],
+          );
+        },
       ),
 
-      bottomNavigationBar: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Divider(height: 1, color: Color(0xFFEDF3E8)),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  BottomNavItem(
-                    icon: Icons.grid_view,
-                    label: "Dashboard",
-                    active: selectedBottomIndex == 0,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 0);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => PatientDashboardPage(
-                                userName: 'namewwww',
-                                email: 'demo@gmail.com',
-                                age: '22',
-                              ),
-                        ),
-                      );
-                    },
-                  ),
-                  BottomNavItem(
-                    icon: Icons.calendar_month,
-                    label: "Schedule",
-                    active: selectedBottomIndex == 1,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 1);
-                      // Replace with your actual page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StitchDesignApp(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  BottomNavItem(
-                    icon: Icons.notifications,
-                    label: "Updates",
-                    active: selectedBottomIndex == 2,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 2);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotificationsScreen1(),
-                        ),
-                      );
-                    },
-                  ),
-                  BottomNavItem(
-                    icon: Icons.person,
-                    label: "Profile",
-                    active: selectedBottomIndex == 3,
-                    onTap: () {
-                      setState(() => selectedBottomIndex = 3);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StitchDesignApp1(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF80DF20),
+        icon: const Icon(Icons.add),
+        label: const Text("Book New Session"),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BookSessionPage()),
+          );
+        },
       ),
     );
   }
@@ -398,22 +326,6 @@ class BottomNavItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// Dummy booking page
-class BookSessionPage extends StatelessWidget {
-  const BookSessionPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Book New Session"),
-        backgroundColor: const Color(0xFF80DF20),
-      ),
-      body: const Center(child: Text("Booking Form Goes Here")),
     );
   }
 }

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sih/login.dart';
+import 'package:sih/main_page.dart';
 
 class PatientSignupPage extends StatefulWidget {
+  const PatientSignupPage({Key? key}) : super(key: key);
+
   @override
   _PatientSignupPageState createState() => _PatientSignupPageState();
 }
@@ -12,6 +17,65 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
   String age = '';
   String email = '';
   String password = '';
+  bool loading = false;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> signupPatient() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => loading = true);
+
+    try {
+      final trimmedEmail = email.trim();
+      final trimmedName = name.trim();
+      final trimmedAge = age.trim();
+
+      // Create user in FirebaseAuth
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(
+            email: trimmedEmail,
+            password: password,
+          );
+
+      String uid = userCredential.user!.uid;
+
+      // Save user details in Firestore
+      await _firestore.collection("patients").doc(uid).set({
+        "name": trimmedName,
+        "age": trimmedAge,
+        "email": trimmedEmail,
+        "createdAt": Timestamp.now(),
+      });
+
+      if (!mounted) return;
+
+      // ✅ Stop loader
+      setState(() => loading = false);
+
+      // ✅ Navigate safely
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainPage()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      setState(() => loading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message ?? "Signup failed")));
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Something went wrong. Please try again."),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +85,6 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
         child: SingleChildScrollView(
           child: Container(
             width: 600,
-            height: 550,
             margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -43,6 +106,7 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // Name
                   TextFormField(
                     decoration: const InputDecoration(
                       labelText: "Full Name",
@@ -51,9 +115,10 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
                     ),
                     validator:
                         (value) => value!.isEmpty ? "Enter your name" : null,
-                    onChanged: (value) => setState(() => name = value),
+                    onChanged: (value) => name = value,
                   ),
                   const SizedBox(height: 25),
+                  // Age
                   TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
@@ -63,10 +128,12 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
                     ),
                     validator:
                         (value) => value!.isEmpty ? "Enter your age" : null,
-                    onChanged: (value) => setState(() => age = value),
+                    onChanged: (value) => age = value,
                   ),
                   const SizedBox(height: 25),
+                  // Email
                   TextFormField(
+                    keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: "Email",
                       border: OutlineInputBorder(),
@@ -74,9 +141,10 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
                     ),
                     validator:
                         (value) => value!.isEmpty ? "Enter your email" : null,
-                    onChanged: (value) => setState(() => email = value),
+                    onChanged: (value) => email = value,
                   ),
                   const SizedBox(height: 25),
+                  // Password
                   TextFormField(
                     obscureText: true,
                     decoration: const InputDecoration(
@@ -87,46 +155,29 @@ class _PatientSignupPageState extends State<PatientSignupPage> {
                     validator:
                         (value) =>
                             value!.isEmpty ? "Enter your password" : null,
-                    onChanged: (value) => setState(() => password = value),
+                    onChanged: (value) => password = value,
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => PatientLoginPage(
-                                  name: name,
-                                  email: email,
-                                  age: age,
-                                ),
+                  loading
+                      ? const CircularProgressIndicator(color: Colors.green)
+                      : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      }
-                    },
-                    child: const Text("Sign Up"),
-                  ),
+                        ),
+                        onPressed: signupPatient,
+                        child: const Text("Sign Up"),
+                      ),
                   const SizedBox(height: 25),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => PatientLoginPage(
-                                name: name,
-                                email: email,
-                                age: age,
-                              ), // direct page reference
+                          builder: (context) => const PatientLoginPage(),
                         ),
                       );
                     },
